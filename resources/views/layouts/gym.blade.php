@@ -30,13 +30,18 @@
                         <div class="hidden md:flex items-center gap-6">
                             <a href="{{ route('members.index') }}"
                                class="text-sm font-medium transition-colors
-                               {{ request()->routeIs('members.*') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' }}">
+                               {{ request()->routeIs('members.index') || request()->routeIs('members.store') || request()->routeIs('members.update') || request()->routeIs('members.destroy') || request()->routeIs('members.export') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' }}">
                                 Members
                             </a>
                             <a href="{{ route('plans.index') }}"
                                class="text-sm font-medium transition-colors
                                {{ request()->routeIs('plans.*') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' }}">
                                 Plans
+                            </a>
+                            <a href="{{ route('members.trash') }}"
+                               class="text-sm font-medium transition-colors
+                               {{ request()->routeIs('members.trash') || request()->routeIs('members.restore') || request()->routeIs('members.force-delete') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' }}">
+                                Trash
                             </a>
                         </div>
 
@@ -63,13 +68,18 @@
             <div class="flex space-x-1 px-2 py-2">
                 <a href="{{ route('members.index') }}"
                    class="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors
-                   {{ request()->routeIs('members.*') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                   {{ request()->routeIs('members.index') || request()->routeIs('members.store') || request()->routeIs('members.update') || request()->routeIs('members.destroy') || request()->routeIs('members.export') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
                     Members
                 </a>
                 <a href="{{ route('plans.index') }}"
                    class="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors
                    {{ request()->routeIs('plans.*') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
                     Plans
+                </a>
+                <a href="{{ route('members.trash') }}"
+                   class="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium transition-colors
+                   {{ request()->routeIs('members.trash') || request()->routeIs('members.restore') || request()->routeIs('members.force-delete') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    Trash
                 </a>
             </div>
         </nav>
@@ -87,6 +97,21 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-900/20">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
                             </div>
                         </div>
                     </div>

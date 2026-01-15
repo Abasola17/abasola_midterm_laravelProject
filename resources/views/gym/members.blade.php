@@ -63,8 +63,14 @@
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 lg:col-span-2">
             <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Add New Member</h2>
-            <form action="{{ route('members.store') }}" method="POST" class="grid gap-4 md:grid-cols-2">
+            <form action="{{ route('members.store') }}" method="POST" enctype="multipart/form-data" class="grid gap-4 md:grid-cols-2">
                 @csrf
+                <div class="md:col-span-2">
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Photo</label>
+                    <input type="file" name="photo" accept="image/jpeg,image/jpg,image/png"
+                           class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG/PNG only, max 2MB</p>
+                </div>
                 <div class="md:col-span-2">
                     <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" value="{{ old('name') }}" required
@@ -136,6 +142,34 @@
         </div>
     </div>
 
+    <!-- Search and Filter Section -->
+    <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+        <form method="GET" action="{{ route('members.index') }}" class="grid gap-4 md:grid-cols-4">
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Search</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, email, or phone"
+                       class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Plan</label>
+                <select name="plan_id" class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                    <option value="">All Plans</option>
+                    @foreach ($plans as $plan)
+                        <option value="{{ $plan->id }}" @selected(request('plan_id') == $plan->id)>{{ $plan->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Search
+                </button>
+                <a href="{{ route('members.index') }}" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
     <div class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
         <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -143,7 +177,16 @@
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Members Directory</h2>
                     <p class="text-sm text-gray-600 dark:text-gray-400">All gym members</p>
                 </div>
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ $members->count() }} total</span>
+                <div class="flex items-center gap-3">
+                    <form method="GET" action="{{ route('members.export') }}" class="inline">
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                        <input type="hidden" name="plan_id" value="{{ request('plan_id') }}">
+                        <button type="submit" class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            Export PDF
+                        </button>
+                    </form>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ $members->count() }} total</span>
+                </div>
             </div>
         </div>
 
@@ -152,6 +195,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">#</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Photo</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Contact</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Plan</th>
@@ -164,6 +208,15 @@
                     @forelse ($members as $member)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $loop->iteration }}</td>
+                            <td class="px-4 py-3">
+                                @if($member->photo)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($member->photo) }}" alt="{{ $member->name }}" class="h-10 w-10 rounded-full object-cover">
+                                @else
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-medium">
+                                        {{ $member->initials() }}
+                                    </div>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 <p class="font-medium text-gray-900 dark:text-white">{{ $member->name }}</p>
                                 @if($member->notes)
@@ -205,9 +258,20 @@
                                                         </svg>
                                                     </button>
                                                 </div>
-                                                <form method="POST" action="{{ route('members.update', $member) }}" class="mt-6 space-y-4">
+                                                <form method="POST" action="{{ route('members.update', $member) }}" enctype="multipart/form-data" class="mt-6 space-y-4">
                                                     @csrf
                                                     @method('PUT')
+                                                    <div>
+                                                        <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Photo</label>
+                                                        @if($member->photo)
+                                                            <div class="mb-2">
+                                                                <img src="{{ \Illuminate\Support\Facades\Storage::url($member->photo) }}" alt="{{ $member->name }}" class="h-16 w-16 rounded-full object-cover">
+                                                            </div>
+                                                        @endif
+                                                        <input type="file" name="photo" accept="image/jpeg,image/jpg,image/png"
+                                                               class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG/PNG only, max 2MB</p>
+                                                    </div>
                                                     <div>
                                                         <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
                                                         <input type="text" name="name" value="{{ $member->name }}" required
@@ -273,8 +337,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No members added yet. Add your first member above!
+                            <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                @if(request('search') || request('plan_id'))
+                                    No members found matching your search criteria.
+                                @else
+                                    No members added yet. Add your first member above!
+                                @endif
                             </td>
                         </tr>
                     @endforelse

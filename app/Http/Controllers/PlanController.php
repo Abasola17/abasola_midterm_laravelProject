@@ -36,7 +36,7 @@ class PlanController extends Controller
     {
         $plan->delete();
 
-        return redirect()->route('plans.index')->with('success', 'Plan deleted successfully.');
+        return redirect()->route('plans.index')->with('success', 'Plan moved to trash successfully.');
     }
 
     protected function validatePlan(Request $request, ?int $planId = null): array

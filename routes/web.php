@@ -20,6 +20,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/members', [MemberController::class, 'store'])->name('members.store');
     Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
     Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
+    Route::get('/members/trash', [MemberController::class, 'trash'])->name('members.trash');
+    Route::post('/members/{id}/restore', [MemberController::class, 'restore'])->name('members.restore');
+    Route::delete('/members/{id}/force-delete', [MemberController::class, 'forceDelete'])->name('members.force-delete');
+    Route::get('/members/export/pdf', [MemberController::class, 'exportPdf'])->name('members.export');
 
     // Gym System - Plans
     Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
